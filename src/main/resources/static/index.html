@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamlytics - CSV & Excel Data Processor</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Main Style -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="dark-mode">
+    <div class="background-glows">
+        <div class="glow-1"></div>
+        <div class="glow-2"></div>
+        <div class="glow-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fa-solid fa-bolt logo-icon"></i>
+                <span class="logo-text">Streamlytics</span>
+            </div>
+            <div class="file-status-badge id="fileStatusBadge">
+                <span class="status-dot red" id="statusDot"></span>
+                <span class="status-text" id="statusText">No Dataset Active</span>
+            </div>
+            <button class="btn btn-secondary btn-reset hidden" id="btnResetAll">
+                <i class="fa-solid fa-arrow-rotate-left"></i> Reset File
+            </button>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- 1. Upload Mode (Shown initially) -->
+            <section class="section-upload" id="sectionUpload">
+                <div class="upload-card">
+                    <div class="upload-header">
+                        <h1>CSV & Excel Data Processing Engine</h1>
+                        <p>Upload large datasets, automatically infer data schemas, and execute real-time Java Streams queries with analytical charts.</p>
+                    </div>
+                    <div class="drop-zone" id="dropZone">
+                        <input type="file" id="fileInput" accept=".csv, .xlsx, .xls" class="hidden-input">
+                        <div class="drop-zone-content">
+                            <div class="icon-wrap">
+                                <i class="fa-solid fa-cloud-arrow-up cloud-icon"></i>
+                            </div>
+                            <h3>Drag & Drop file here</h3>
+                            <p>or <span class="browse-link">browse your files</span></p>
+                            <span class="file-types-hint">Supports CSV and Excel (.xlsx, .xls) files</span>
+                        </div>
+                    </div>
+                    <div class="upload-progress-container hidden" id="progressContainer">
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span class="progress-status" id="progressStatus">Parsing file...</span>
+                            <span class="progress-percent" id="progressPercent">0%</span>
+                        </div>
+                    </div>
+                    <div class="upload-error hidden" id="uploadError">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="uploadErrorText">Error parsing CSV file.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Dashboard Mode (Shown after successful upload) -->
+            <section class="section-dashboard hidden" id="sectionDashboard">
+                <div class="dashboard-grid">
+                    
+                    <!-- Left Sidebar (Metadata & Controls) -->
+                    <aside class="dashboard-sidebar">
+                        <!-- File Metadata Card -->
+                        <div class="glass-card meta-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-file-invoice"></i> Dataset Details</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="meta-row">
+                                    <span class="meta-label">File Name</span>
+                                    <span class="meta-value text-truncate" id="metaFileName">-</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">File Size</span>
+                                    <span class="meta-value" id="metaFileSize">-</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Total Rows</span>
+                                    <span class="meta-value highlight-text" id="metaRowCount">-</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Parse Speed</span>
+                                    <span class="meta-value" id="metaParseSpeed">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Filters Card -->
+                        <div class="glass-card filter-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-filter"></i> Dynamic Filters</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="filter-rules-list" id="filterRulesList">
+                                    <!-- Rules added dynamically here -->
+                                    <div class="empty-filters-text" id="emptyFiltersText">
+                                        No active filter rules. Add one below to query the dataset.
+                                    </div>
+                                </div>
+                                
+                                <div class="add-rule-form">
+                                    <div class="form-group">
+                                        <label for="filterColumn">Column</label>
+                                        <select id="filterColumn" class="form-control">
+                                            <!-- Dynamically populated -->
+                                        </select>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group flex-1">
+                                            <label for="filterOperator">Operator</label>
+                                            <select id="filterOperator" class="form-control">
+                                                <option value="EQUALS">Equals</option>
+                                                <option value="CONTAINS">Contains</option>
+                                                <option value="GREATER_THAN">Greater Than</option>
+                                                <option value="LESS_THAN">Less Than</option>
+                                                <option value="STARTS_WITH">Starts With</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label for="filterValue">Value</label>
+                                            <input type="text" id="filterValue" class="form-control" placeholder="Match value...">
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary btn-block" id="btnAddFilterRule">
+                                        <i class="fa-solid fa-plus"></i> Add Filter Rule
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schema Metadata Card -->
+                        <div class="glass-card schema-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-table-list"></i> Column Schema</h3>
+                            </div>
+                            <div class="card-body scrollable-y max-h-300">
+                                <div class="schema-list" id="schemaList">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Right Main Dashboard View -->
+                    <div class="dashboard-main-pane">
+                        
+                        <!-- Real-time Stats Cards -->
+                        <div class="stats-row" id="statsRow">
+                            <!-- Populated with numeric summarize statistics -->
+                        </div>
+
+                        <!-- Visual Charts Section -->
+                        <div class="glass-card chart-card">
+                            <div class="card-header chart-header-controls">
+                                <h3><i class="fa-solid fa-chart-pie"></i> Visual Data Analytics</h3>
+                                <div class="chart-selection-controls">
+                                    <select id="chartColumnSelect" class="form-control inline-select">
+                                        <!-- Column options here -->
+                                    </select>
+                                    <select id="chartTypeSelect" class="form-control inline-select">
+                                        <option value="bar">Bar Chart</option>
+                                        <option value="pie">Pie Chart</option>
+                                        <option value="line">Line Chart</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="card-body chart-container-body">
+                                <div class="chart-wrapper">
+                                    <canvas id="analyticsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Java Streams Query Console Code Box -->
+                        <div class="glass-card code-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-code"></i> Live Java Streams Code Console</h3>
+                                <span class="badge badge-accent">Server Execution Context</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="code-box-wrapper">
+                                    <div class="code-box-header">
+                                        <span class="file-name">DataProcessingService.java</span>
+                                        <button class="btn-copy" id="btnCopyCode" title="Copy code">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <pre class="code-pre"><code id="javaStreamCode" class="language-java">// Java Stream code will compile live...</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Paginated Data Table -->
+                        <div class="glass-card table-card">
+                            <div class="card-header table-header-flex">
+                                <h3><i class="fa-solid fa-table"></i> Parsed Dataset Registry</h3>
+                                <div class="table-search-bar">
+                                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                    <input type="text" id="tableSearchInput" placeholder="Quick dynamic query...">
+                                </div>
+                            </div>
+                            <div class="card-body no-padding scrollable-x">
+                                <table class="data-table" id="dataTable">
+                                    <thead>
+                                        <tr id="tableHeaders">
+                                            <!-- Dynamically populated -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableRows">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                                <div class="table-empty-state hidden" id="tableEmptyState">
+                                    <i class="fa-solid fa-inbox empty-icon"></i>
+                                    <h4>No records matched your filters.</h4>
+                                    <p>Try weakening or removing some dynamic rules in the sidebar.</p>
+                                </div>
+                            </div>
+                            <div class="card-footer table-pagination-footer">
+                                <div class="pagination-info">
+                                    Showing <span id="pagStart">0</span> to <span id="pagEnd">0</span> of <span id="pagTotal">0</span> entries
+                                </div>
+                                <div class="pagination-controls">
+                                    <button class="btn-pag btn-icon" id="btnPrevPage" disabled>
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </button>
+                                    <span class="page-indicator">Page <span id="currentPage">1</span> of <span id="totalPages">1</span></span>
+                                    <button class="btn-pag btn-icon" id="btnNextPage" disabled>
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

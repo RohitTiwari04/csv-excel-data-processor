@@ -1,0 +1,16 @@
+Name,Department,Role,Salary,PerformanceRating,HireDate,Active
+Alice Vance,Engineering,Backend Developer,98000,4.8,2021-03-12,true
+Bob Sterling,Sales,Account Executive,62000,4.2,2022-05-18,true
+Carol Miller,Engineering,Frontend Developer,89000,4.5,2020-11-01,true
+David Jones,Marketing,SEO Analyst,55000,3.9,2023-01-15,true
+Eva Smith,Engineering,QA Engineer,74000,4.1,2021-09-20,false
+Frank Wright,Sales,Sales Manager,115000,4.7,2019-06-01,true
+Grace Hopper,Engineering,DevOps Engineer,105000,4.9,2020-04-15,true
+Hank Hill,Operations,Facility Manager,48000,3.8,2018-08-10,true
+Ivy Adams,Marketing,Content Strategist,58000,4.0,2022-10-05,true
+Jack Thompson,Operations,Logistics Coordinator,65000,4.3,2021-07-22,false
+Karen Carpenter,Engineering,Engineering Manager,135000,4.8,2018-12-01,true
+Leo Fitz,Engineering,Research Scientist,92000,4.6,2022-02-14,true
+Minda Park,Sales,Customer Success,59000,4.4,2023-03-10,true
+Nate Fisher,Operations,Operations Analyst,71000,4.2,2021-05-05,true
+Olivia Wilde,Marketing,Marketing Director,125000,4.6,2019-10-01,true
